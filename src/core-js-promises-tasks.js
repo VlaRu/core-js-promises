@@ -98,8 +98,26 @@ function getFirstResolvedPromiseResult(promises) {
  * [promise3, promise6, promise2] => Promise rejected with 2
  * [promise3, promise4, promise6] => Promise rejected with 6
  */
-function getFirstPromiseResult(/* promises */) {
-  throw new Error('Not implemented');
+function getFirstPromiseResult(promises) {
+  return new Promise((resolve, reject) => {
+    if (!Array.isArray(promises)) {
+      reject(new Error('Input should be an array of promises'));
+      return;
+    }
+
+    promises.forEach((promise) => {
+      if (!(promise instanceof Promise)) {
+        reject(new Error('All items in the array should be promises'));
+      }
+    });
+    Promise.race(promises)
+      .then((result) => {
+        resolve(result);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 }
 
 /**
@@ -113,8 +131,27 @@ function getFirstPromiseResult(/* promises */) {
  * [Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)] => Promise fulfilled with [1, 2, 3]
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)] => Promise rejected with 2
  */
-function getAllOrNothing(/* promises */) {
-  throw new Error('Not implemented');
+function getAllOrNothing(promises) {
+  return new Promise((resolve, reject) => {
+    if (!Array.isArray(promises)) {
+      reject(new Error('Input should be an array of promises'));
+      return;
+    }
+
+    promises.forEach((promise) => {
+      if (!(promise instanceof Promise)) {
+        reject(new Error('All items in the array should be promises'));
+      }
+    });
+
+    Promise.all(promises)
+      .then((results) => {
+        resolve(results);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 }
 
 /**
@@ -129,8 +166,26 @@ function getAllOrNothing(/* promises */) {
  * [Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)] => Promise fulfilled with [1, 2, 3]
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)]  => Promise fulfilled with [1, null, 3]
  */
-function getAllResult(/* promises */) {
-  throw new Error('Not implemented');
+function getAllResult(promises) {
+  return new Promise((resolve, reject) => {
+    if (!Array.isArray(promises)) {
+      reject(new Error('Input should be an array of promises'));
+      return;
+    }
+
+    promises.forEach((promise) => {
+      if (!(promise instanceof Promise)) {
+        reject(new Error('All items in the array should be promises'));
+      }
+    });
+    Promise.all(promises.map((promise) => promise.catch(() => null)))
+      .then((results) => {
+        resolve(results);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 }
 
 /**
@@ -151,8 +206,28 @@ function getAllResult(/* promises */) {
  * [promise1, promise4, promise3] => Promise.resolved('104030')
  * [promise1, promise4, promise3, promise2] => Promise.resolved('10403020')
  */
-function queuPromises(/* promises */) {
-  throw new Error('Not implemented');
+function queuPromises(promises) {
+  return new Promise((resolve, reject) => {
+    if (!Array.isArray(promises)) {
+      reject(new Error('Input should be an array of promises'));
+      return;
+    }
+    let result = '';
+    promises
+      .reduce((chain, promise) => {
+        return chain.then(() => {
+          return promise.then((value) => {
+            result += value;
+          });
+        });
+      }, Promise.resolve())
+      .then(() => {
+        resolve(result);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 }
 
 module.exports = {
